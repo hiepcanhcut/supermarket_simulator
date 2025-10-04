@@ -1,0 +1,37 @@
+{
+  "name": "supermarket-tycoon",
+  "version": "1.0.0",
+  "description": "Supermarket Management Game - Desktop Version",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win portable",
+    "dist": "electron-builder"
+  },
+  "author": "Supermarket Tycoon Team",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^27.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "build": {
+    "appId": "com.supermarket.tycoon",
+    "productName": "Supermarket Tycoon",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "index.html",
+      "renderer.js",
+      "package.json"
+    ],
+    "win": {
+      "target": "portable",
+      "icon": "icon.ico"
+    },
+    "portable": {
+      "artifactName": "Supermarket-Tycoon.exe"
+    }
+  }
+}
