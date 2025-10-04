@@ -1,15 +1,11 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Supermarket Tycoon</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -20,12 +16,20 @@
             user-select: none;
         }
 
+        /* Layout: 2 cột - trái: game, phải: log */
         .game-container {
             width: 100%;
             height: 100vh;
             padding: 20px;
+            display: grid;
+            grid-template-columns: 3fr 1fr; /* 3 phần cho game, 1 phần cho log */
+            gap: 20px;
+        }
+
+        .left-panel {
             display: flex;
             flex-direction: column;
+            height: 100%;
         }
 
         /* Header */
@@ -39,9 +43,11 @@
         }
 
         .game-title {
-            font-size: 2.5em;
+            font-size: 3em;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+            white-space: nowrap;
+            overflow: visible;
         }
 
         .stats {
@@ -69,6 +75,7 @@
             gap: 20px;
             margin-bottom: 20px;
             padding: 10px;
+            overflow-y: auto; /* scroll khi nhiều shelf */
         }
 
         .shelf {
@@ -108,21 +115,9 @@
             filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
         }
 
-        .product-info {
-            font-size: 1em;
-            line-height: 1.4;
-        }
-
-        .product-name {
-            font-weight: bold;
-            font-size: 1.2em;
-            margin-bottom: 5px;
-        }
-
-        .product-stock {
-            color: #ffeb3b;
-            font-weight: bold;
-        }
+        .product-info { font-size: 1em; line-height: 1.4; }
+        .product-name { font-weight: bold; font-size: 1.2em; margin-bottom: 5px; }
+        .product-stock { color: #ffeb3b; font-weight: bold; }
 
         /* Controls */
         .controls {
@@ -146,7 +141,6 @@
             position: relative;
             overflow: hidden;
         }
-
         button::before {
             content: '';
             position: absolute;
@@ -157,63 +151,62 @@
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
             transition: left 0.5s;
         }
+        button:hover::before { left: 100%; }
+        button:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); }
+        button:active { transform: translateY(0); }
+        button:disabled { background: linear-gradient(135deg, #757575, #616161); cursor: not-allowed; transform: none; }
 
-        button:hover::before {
-            left: 100%;
-        }
-
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        button:disabled {
-            background: linear-gradient(135deg, #757575, #616161);
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* Log */
+        /* Log panel (phải) */
         .log {
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.7);
             border-radius: 12px;
             padding: 15px;
-            margin-top: 20px;
-            max-height: 150px;
-            overflow-y: auto;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 1.05em;
+            line-height: 1.4;
+            border: 2px solid rgba(255, 255, 255, 0.12);
             font-family: 'Courier New', monospace;
+
+            display: flex;
+            flex-direction: column;
+
+            height: 100%;      /* vẫn full chiều cao cột */
+            min-height: 0;     /* ngăn việc đẩy phình layout */
+        }
+
+        .clear-btn {
+            margin-bottom: 10px;
+            padding: 8px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .clear-btn:hover { opacity: 0.9; }
+
+        /* Khu vực chứa log entries */
+        .log-entries {
+            flex: 1;
+            overflow-y: auto;   /* luôn có scroll khi nhiều */
+            min-height: 0;      /* quan trọng: không phình cột trái */
+            padding-right: 6px;
         }
 
         .log-entry {
             margin: 8px 0;
             padding: 8px 12px;
             border-left: 4px solid #4CAF50;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 4px;
-            animation: fadeIn 0.3s ease;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 6px;
+            animation: fadeIn 0.25s ease;
         }
+        .log-entry.error { border-left-color: #f44336; color: #ff8a80; }
+        .log-entry.warning { border-left-color: #ff9800; color: #ffd54f; }
+        .log-entry.success { border-left-color: #4CAF50; color: #a5d6a7; }
 
-        .log-entry.error {
-            border-left-color: #f44336;
-            color: #ff8a80;
-        }
-
-        .log-entry.warning {
-            border-left-color: #ff9800;
-            color: #ffd54f;
-        }
-
-        .log-entry.success {
-            border-left-color: #4CAF50;
-            color: #a5d6a7;
-        }
-
-        /* Modals */
+        /* Modals (giữ nguyên) */
         .modal {
             display: none;
             position: fixed;
@@ -241,33 +234,12 @@
             position: relative;
         }
 
-        .close-modal {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 24px;
-            cursor: pointer;
-            color: #ecf0f1;
-            transition: color 0.3s;
-        }
+        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #ecf0f1; transition: color 0.3s; }
+        .close-modal:hover { color: #e74c3c; }
+        .modal-title { margin-bottom: 20px; text-align: center; font-size: 1.8em; }
 
-        .close-modal:hover {
-            color: #e74c3c;
-        }
-
-        .modal-title {
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 1.8em;
-        }
-
-        /* Restock Modal */
-        .restock-options {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-
+        /* Restock options */
+        .restock-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
         .restock-option {
             background: rgba(255, 255, 255, 0.1);
             padding: 20px;
@@ -277,83 +249,58 @@
             transition: all 0.3s ease;
             border: 2px solid transparent;
         }
+        .restock-option:hover { background: rgba(255, 255, 255, 0.15); border-color: #3498db; transform: translateY(-2px); }
 
-        .restock-option:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: #3498db;
-            transform: translateY(-2px);
-        }
-
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .pulse {
-            animation: pulse 2s infinite;
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.06); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.18); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.35); }
 
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.5);
-        }
     </style>
 </head>
 <body>
     <div class="game-container">
-        <!-- Header -->
-        <div class="header">
-            <div class="game-title">🛒 SUPERMARKET TYCOON 🛒</div>
-            <div class="stats">
-                <div class="stat">📅 Ngày: <span id="day">1</span></div>
-                <div class="stat">🏪 Cấp: <span id="level">1</span></div>
-                <div class="stat">😊 Danh tiếng: <span id="reputation">10</span></div>
-                <div class="stat">💰 Tiền: $<span id="money">1000</span></div>
-                <div class="stat">👥 Khách: <span id="customers">0</span></div>
-                <div class="stat">📊 Doanh thu: $<span id="totalSales">0</span></div>
+        <!-- LEFT: game -->
+        <div class="left-panel">
+            <!-- Header -->
+            <div class="header">
+                <div class="game-title">🛒 SUPERMARKET TYCOON 🛒</div>
+                <div class="stats">
+                    <div class="stat">📅 Ngày: <span id="day">1</span></div>
+                    <div class="stat">🏪 Cấp: <span id="level">1</span></div>
+                    <div class="stat">😊 Danh tiếng: <span id="reputation">10</span></div>
+                    <div class="stat">💰 Tiền: $<span id="money">1000</span></div>
+                    <div class="stat">👥 Khách: <span id="customers">0</span></div>
+                    <div class="stat">📊 Doanh thu: $<span id="totalSales">0</span></div>
+                </div>
+            </div>
+
+            <!-- Supermarket Shelves -->
+            <div class="supermarket" id="supermarket">
+                <!-- Shelves generated by renderer.js -->
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <button onclick="handleRestock()" class="pulse">📦 Nhập hàng</button>
+                <button onclick="handleBusiness()">🏪 Kinh doanh (Qua ngày)</button>
+                <button onclick="showStatistics()">📈 Thống kê</button>
+                <button onclick="showUpgrades()">🚀 Nâng cấp</button>
+                <button onclick="showInstructions()">ℹ️ Hướng dẫn</button>
+                <button onclick="saveGame()">💾 Lưu game</button>
             </div>
         </div>
 
-        <!-- Supermarket Shelves -->
-        <div class="supermarket" id="supermarket">
-            <!-- Shelves will be generated by JavaScript -->
-        </div>
-
-        <!-- Controls -->
-        <div class="controls">
-            <button onclick="handleRestock()" class="pulse">📦 Nhập hàng</button>
-            <button onclick="handleBusiness()">🏪 Kinh doanh (Qua ngày)</button>
-            <button onclick="showStatistics()">📈 Thống kê</button>
-            <button onclick="showUpgrades()">🚀 Nâng cấp</button>
-            <button onclick="showInstructions()">ℹ️ Hướng dẫn</button>
-            <button onclick="saveGame()">💾 Lưu game</button>
-        </div>
-
-        <!-- Game Log -->
-        <div class="log" id="log">
-            <div class="log-entry success">🎮 Chào mừng đến với Supermarket Tycoon!</div>
-            <div class="log-entry">💡 Nhấn 'Nhập hàng' để bắt đầu kinh doanh!</div>
+        <!-- RIGHT: log -->
+        <div class="log" aria-label="Game log">
+            <button class="clear-btn" onclick="clearLog()">🧹 Xóa thông báo</button>
+            <div class="log-entries" id="log">
+                <div class="log-entry success">🎮 Chào mừng đến với Supermarket Tycoon!</div>
+                <div class="log-entry">💡 Nhấn 'Nhập hàng' để bắt đầu kinh doanh!</div>
+            </div>
         </div>
     </div>
 
@@ -384,9 +331,7 @@
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('upgradesModal')">×</span>
             <h2 class="modal-title">🚀 NÂNG CẤP SIÊU THỊ</h2>
-            <div id="upgradesContent">
-                <!-- Upgrades will be filled by JavaScript -->
-            </div>
+            <div id="upgradesContent"></div>
         </div>
     </div>
 
@@ -395,9 +340,7 @@
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('instructionsModal')">×</span>
             <h2 class="modal-title">🎮 HƯỚNG DẪN CHƠI</h2>
-            <div id="instructionsContent">
-                <!-- Instructions will be filled by JavaScript -->
-            </div>
+            <div id="instructionsContent"></div>
         </div>
     </div>
 
