@@ -480,3 +480,8 @@ window.addEventListener('error', function(e) {
     console.error('Global error:', e.error);
     addLog(`❌ Lỗi: ${e.error.message}`, "error");
 });
+
+function clearLog() {
+    const entries = document.getElementById('log');
+    if (entries) entries.innerHTML = '';
+}
